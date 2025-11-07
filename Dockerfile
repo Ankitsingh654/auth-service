@@ -1,14 +1,24 @@
-# Step 1: Use a lightweight, official Java 17 image (replacement for openjdk)
-FROM eclipse-temurin:17-jdk
-
-# Step 2: Set working directory inside the container
+# ------------ STAGE 1: Build the JAR using Maven ------------
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
 
-# Step 3: Copy the Spring Boot JAR file into the container
-COPY target/auth-service-0.0.1-SNAPSHOT.jar app.jar
+# Copy pom.xml and download dependencies first (for caching)
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Step 4: Expose the port your Spring Boot app runs on
+# Copy the source code and build
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# ------------ STAGE 2: Run the built JAR ------------
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+
+# Copy JAR file from builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose your Spring Boot app port
 EXPOSE 8081
 
-# Step 5: Run the JAR file
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
