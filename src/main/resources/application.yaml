@@ -4,18 +4,25 @@ server:
 spring:
   application:
     name: auth-service
+
   datasource:
-    #url: jdbc:postgresql://localhost:5432/softaura_auth
-    url: jdbc:postgresql://host.docker.internal:5432/softaura_auth
-    username: postgres
-    password: saas_pass
+    # ✅ Render PostgreSQL connection
+    # Picks DATABASE_URL from Render environment; falls back to local DB if not found
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/softaura_auth}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:saas_pass}
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
+# ✅ Eureka client for Render — use host.docker.internal or ENV var
 eureka:
   client:
     service-url:
-    #  defaultZone: http://localhost:8761/eureka/
-      defaultZone: http://host.docker.internal:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://host.docker.internal:8761/eureka/}
