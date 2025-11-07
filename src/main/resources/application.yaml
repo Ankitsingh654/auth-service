@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    #url: jdbc:postgresql://localhost:5432/softaura_auth
+    url: jdbc:postgresql://host.docker.internal:5432/softaura_auth
+    username: postgres
+    password: saas_pass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    service-url:
+    #  defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://host.docker.internal:8761/eureka/
